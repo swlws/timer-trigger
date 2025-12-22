@@ -2,8 +2,6 @@
  * Tick Strategy Definitions
  * =============================== */
 
-import { emit } from 'process';
-
 interface TickStrategyContext {
   now: number;
   targetTime: number;
@@ -73,14 +71,7 @@ class TimeTriggerTask {
     const diff = this.targetTime - now;
 
     if (diff <= 0) {
-      if (!this.executed) {
-        this.executed = true;
-        try {
-          this.callback();
-        } finally {
-          this.destroy();
-        }
-      }
+      this.execute();
       return;
     }
 
@@ -89,6 +80,17 @@ class TimeTriggerTask {
     const delay = strategy.getNextDelay(ctx);
 
     this.timerId = window.setTimeout(() => this.tick(), delay);
+  }
+
+  execute() {
+    if (!this.executed) {
+      this.executed = true;
+      try {
+        this.callback();
+      } finally {
+        this.destroy();
+      }
+    }
   }
 
   destroy() {
@@ -115,6 +117,7 @@ export function createTimeTrigger() {
      * 注册一次性时间触发任务
      * @param targetTime 目标时间
      * @param callback 回调函数
+     * @returns 取消函数
      */
     on(targetTime: number | string | Date, callback: () => void) {
       const ts = normalizeTime(targetTime);
@@ -138,15 +141,21 @@ export function createTimeTrigger() {
     },
 
     /**
-     * 立即触发
+     * 立即触发所有未执行任务
      */
     emitNow() {
-      tasks.forEach((task) => {});
+      tasks.forEach((task) => {
+        task.execute();
+        tasks.delete(task);
+      });
     },
 
+    /**
+     * 清理所有任务
+     */
     clearAll() {
       tasks.forEach((task) => {
-        task?.destroy();
+        task.destroy();
       });
       tasks.clear();
     },
