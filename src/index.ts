@@ -10,7 +10,7 @@ export function createTimeTrigger() {
     /**
      * 注册一次性时间触发任务
      */
-    on(targetTime: number | string | Date, callback: () => void) {
+    once(targetTime: number | string | Date, callback: () => void) {
       const ts = normalizeTime(targetTime);
 
       let group = taskGroups.get(ts);
