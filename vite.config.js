@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     target: 'esnext', // 构建目标
     minify: false, // 是否压缩
-    sourcemap: true, // 输出 sourcemap
+    sourcemap: false, // 输出 sourcemap
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'), // 库入口文件
       name: 'TimerTrigger', // UMD 模式下的全局变量名
