@@ -1,107 +1,10 @@
-/* ===============================
- * Tick Strategy Definitions
- * =============================== */
-
-interface TickStrategyContext {
-  now: number;
-  targetTime: number;
-}
-
-interface TickStrategy {
-  getNextDelay(ctx: TickStrategyContext): number;
-}
-
-class SecondPrecisionStrategy implements TickStrategy {
-  getNextDelay(ctx: TickStrategyContext): number {
-    return 1000 - (ctx.now % 1000);
-  }
-}
-
-class HalfRemainingStrategy implements TickStrategy {
-  getNextDelay(ctx: TickStrategyContext): number {
-    const remaining = ctx.targetTime - ctx.now;
-    return Math.max(Math.floor(remaining / 2), 1000);
-  }
-}
-
-class TickStrategyResolver {
-  private second = new SecondPrecisionStrategy();
-  private half = new HalfRemainingStrategy();
-
-  resolve(ctx: TickStrategyContext): TickStrategy {
-    const remainingSeconds = Math.floor((ctx.targetTime - ctx.now) / 1000);
-    return remainingSeconds <= 60 ? this.second : this.half;
-  }
-}
-
-/* ===============================
- * TimeTriggerTask (One-shot)
- * =============================== */
-
-class TimeTriggerTask {
-  private timerId: number | null = null;
-  private executed = false;
-
-  constructor(
-    public targetTime: number,
-    private callback: () => void,
-    private resolver: TickStrategyResolver
-  ) {
-    this.tick();
-  }
-
-  private clearTimer() {
-    if (this.timerId !== null) {
-      clearTimeout(this.timerId);
-      this.timerId = null;
-    }
-  }
-
-  private tick() {
-    const now = Date.now();
-    const diff = this.targetTime - now;
-
-    if (diff <= 0) {
-      this.execute();
-      return;
-    }
-
-    const ctx: TickStrategyContext = { now, targetTime: this.targetTime };
-    const strategy = this.resolver.resolve(ctx);
-    const delay = strategy.getNextDelay(ctx);
-
-    this.timerId = window.setTimeout(() => this.tick(), delay);
-  }
-
-  execute() {
-    if (!this.executed) {
-      this.executed = true;
-      try {
-        this.callback();
-      } finally {
-        this.destroy();
-      }
-    }
-  }
-
-  destroy() {
-    this.clearTimer();
-  }
-}
-
-/* ===============================
- * TimeTrigger (Public API)
- * =============================== */
+import { TickStrategyResolver } from './strategies';
+import { TimeTriggerTaskGroup } from './taskGroup';
+import { normalizeTime } from './utils';
 
 export function createTimeTrigger() {
   const resolver = new TickStrategyResolver();
-  const tasks = new Set<TimeTriggerTask>();
-
-  function normalizeTime(time: number | string | Date): number {
-    const ts = typeof time === 'number' ? time : new Date(time).getTime();
-    if (isNaN(ts)) throw new Error('Invalid target time');
-    return ts;
-  }
+  const taskGroups = new Map<number, TimeTriggerTaskGroup>();
 
   return {
     /**
@@ -110,36 +13,43 @@ export function createTimeTrigger() {
     on(targetTime: number | string | Date, callback: () => void) {
       const ts = normalizeTime(targetTime);
 
-      const doCallback = () => {
+      let group = taskGroups.get(ts);
+      if (!group) {
+        group = new TimeTriggerTaskGroup(ts, new Set(), resolver);
+        taskGroups.set(ts, group);
+      }
+
+      const wrappedCallback = () => {
         try {
           callback();
         } finally {
-          task.destroy();
-          tasks.delete(task);
+          taskGroups.delete(ts);
         }
       };
-      const task = new TimeTriggerTask(ts, doCallback, resolver);
 
-      tasks.add(task);
+      group.addTask(wrappedCallback);
 
+      // 返回取消函数
       return () => {
-        task.destroy();
-        tasks.delete(task);
+        group!.destroy();
+        taskGroups.delete(ts);
       };
     },
 
     /**
-     * 立即触发指定目标时间的任务
-     * @param targetTimes 可选，单个时间或时间数组；不传则触发所有任务
+     * 立即触发指定 targetTime 任务
      */
     emitNow(
       targetTimes?: number | string | Date | Array<number | string | Date>
     ) {
       let times: number[];
+
       if (targetTimes === undefined) {
         // 不传参数，触发全部任务
-        tasks.forEach((task) => task.execute());
-        tasks.clear();
+        taskGroups.forEach((group) => {
+          group.execute();
+          taskGroups.delete(group.targetTime);
+        });
         return;
       }
 
@@ -149,10 +59,11 @@ export function createTimeTrigger() {
         times = targetTimes.map(normalizeTime);
       }
 
-      tasks.forEach((task) => {
-        if (times.includes(task.targetTime)) {
-          task.execute();
-          tasks.delete(task);
+      times.forEach((t) => {
+        const group = taskGroups.get(t);
+        if (group) {
+          group.execute();
+          taskGroups.delete(t);
         }
       });
     },
@@ -161,8 +72,8 @@ export function createTimeTrigger() {
      * 清理所有任务
      */
     clearAll() {
-      tasks.forEach((task) => task.destroy());
-      tasks.clear();
+      taskGroups.forEach((group) => group.destroy());
+      taskGroups.clear();
     },
   };
 }
