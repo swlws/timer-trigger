@@ -55,7 +55,7 @@ export class TimeTriggerTaskGroup {
     });
     const delay = strategy.getNextDelay({ now, targetTime: this.targetTime });
 
-    this.timerId = window.setTimeout(() => this.tick(), delay);
+    this.timerId = setTimeout(() => this.tick(), delay);
   }
 
   execute() {
