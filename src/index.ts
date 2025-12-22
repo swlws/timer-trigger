@@ -11,18 +11,12 @@ interface TickStrategy {
   getNextDelay(ctx: TickStrategyContext): number;
 }
 
-/**
- * ≤ 1 分钟：秒级精度策略
- */
 class SecondPrecisionStrategy implements TickStrategy {
   getNextDelay(ctx: TickStrategyContext): number {
     return 1000 - (ctx.now % 1000);
   }
 }
 
-/**
- * > 1 分钟：剩余时间 / 2 策略
- */
 class HalfRemainingStrategy implements TickStrategy {
   getNextDelay(ctx: TickStrategyContext): number {
     const remaining = ctx.targetTime - ctx.now;
@@ -30,9 +24,6 @@ class HalfRemainingStrategy implements TickStrategy {
   }
 }
 
-/**
- * 策略选择器
- */
 class TickStrategyResolver {
   private second = new SecondPrecisionStrategy();
   private half = new HalfRemainingStrategy();
@@ -52,7 +43,7 @@ class TimeTriggerTask {
   private executed = false;
 
   constructor(
-    private targetTime: number,
+    public targetTime: number,
     private callback: () => void,
     private resolver: TickStrategyResolver
   ) {
@@ -115,9 +106,6 @@ export function createTimeTrigger() {
   return {
     /**
      * 注册一次性时间触发任务
-     * @param targetTime 目标时间
-     * @param callback 回调函数
-     * @returns 取消函数
      */
     on(targetTime: number | string | Date, callback: () => void) {
       const ts = normalizeTime(targetTime);
@@ -141,12 +129,31 @@ export function createTimeTrigger() {
     },
 
     /**
-     * 立即触发所有未执行任务
+     * 立即触发指定目标时间的任务
+     * @param targetTimes 可选，单个时间或时间数组；不传则触发所有任务
      */
-    emitNow() {
+    emitNow(
+      targetTimes?: number | string | Date | Array<number | string | Date>
+    ) {
+      let times: number[];
+      if (targetTimes === undefined) {
+        // 不传参数，触发全部任务
+        tasks.forEach((task) => task.execute());
+        tasks.clear();
+        return;
+      }
+
+      if (!Array.isArray(targetTimes)) {
+        times = [normalizeTime(targetTimes)];
+      } else {
+        times = targetTimes.map(normalizeTime);
+      }
+
       tasks.forEach((task) => {
-        task.execute();
-        tasks.delete(task);
+        if (times.includes(task.targetTime)) {
+          task.execute();
+          tasks.delete(task);
+        }
       });
     },
 
@@ -154,9 +161,7 @@ export function createTimeTrigger() {
      * 清理所有任务
      */
     clearAll() {
-      tasks.forEach((task) => {
-        task.destroy();
-      });
+      tasks.forEach((task) => task.destroy());
       tasks.clear();
     },
   };
