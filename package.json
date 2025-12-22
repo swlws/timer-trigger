@@ -4,7 +4,8 @@
   "description": "Time Trigger",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build"
   },
   "repository": {
     "type": "git",
@@ -17,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/swlws/time-trigger/issues"
   },
-  "homepage": "https://github.com/swlws/time-trigger#readme"
+  "homepage": "https://github.com/swlws/time-trigger#readme",
+  "devDependencies": {
+    "vite": "^7.3.0",
+    "vite-plugin-dts": "^4.5.4"
+  }
 }
