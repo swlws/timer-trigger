@@ -1,7 +1,7 @@
 {
-  "name": "time-trigger",
+  "name": "timer-trigger",
   "version": "1.0.0",
-  "description": "Time Trigger",
+  "description": "Timer Trigger",
   "main": "dit/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -13,10 +13,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/swlws/time-trigger.git"
+    "url": "git+https://github.com/swlws/timer-trigger.git"
   },
   "keywords": [
-    "time-trigger",
+    "timer-trigger",
     "timer",
     "corn"
   ],
@@ -24,9 +24,9 @@
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/swlws/time-trigger/issues"
+    "url": "https://github.com/swlws/timer-trigger/issues"
   },
-  "homepage": "https://github.com/swlws/time-trigger#readme",
+  "homepage": "https://github.com/swlws/timer-trigger#readme",
   "devDependencies": {
     "vite": "^7.3.0",
     "vite-plugin-dts": "^4.5.4"
