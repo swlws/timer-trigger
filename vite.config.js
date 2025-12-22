@@ -15,7 +15,7 @@ export default defineConfig({
       entry: path.resolve(__dirname, 'src/index.ts'), // 库入口文件
       name: 'TimerTrigger', // UMD 模式下的全局变量名
       fileName: (format) => `timer-trigger.${format}.js`, // 输出文件名
-      formats: ['es', 'cjs', 'umd'], // 输出格式
+      formats: ['es', 'umd'], // 输出格式
     },
     rollupOptions: {
       // 外部依赖，不打包进库
