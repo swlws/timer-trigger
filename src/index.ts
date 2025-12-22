@@ -2,6 +2,8 @@
  * Tick Strategy Definitions
  * =============================== */
 
+import { emit } from 'process';
+
 interface TickStrategyContext {
   now: number;
   targetTime: number;
@@ -54,8 +56,7 @@ class TimeTriggerTask {
   constructor(
     private targetTime: number,
     private callback: () => void,
-    private resolver: TickStrategyResolver,
-    private onCleanup: () => void
+    private resolver: TickStrategyResolver
   ) {
     this.tick();
   }
@@ -92,7 +93,6 @@ class TimeTriggerTask {
 
   destroy() {
     this.clearTimer();
-    this.onCleanup();
   }
 }
 
@@ -102,7 +102,7 @@ class TimeTriggerTask {
 
 export function createTimeTrigger() {
   const resolver = new TickStrategyResolver();
-  const tasks = new Set<TimeTriggerTask | null>();
+  const tasks = new Set<TimeTriggerTask>();
 
   function normalizeTime(time: number | string | Date): number {
     const ts = typeof time === 'number' ? time : new Date(time).getTime();
@@ -119,21 +119,36 @@ export function createTimeTrigger() {
     on(targetTime: number | string | Date, callback: () => void) {
       const ts = normalizeTime(targetTime);
 
-      let task: TimeTriggerTask | null = new TimeTriggerTask(
-        ts,
-        callback,
-        resolver,
-        () => {
-          // 自动清理 task
-          // 因为任务只触发一次，所以不需要返回取消
+      const doCallback = () => {
+        try {
+          callback();
+        } finally {
+          task.destroy();
           tasks.delete(task);
         }
-      );
+      };
+      const task = new TimeTriggerTask(ts, doCallback, resolver);
+
+      tasks.add(task);
 
       return () => {
-        task?.destroy();
-        task = null;
+        task.destroy();
+        tasks.delete(task);
       };
+    },
+
+    /**
+     * 立即触发
+     */
+    emitNow() {
+      tasks.forEach((task) => {});
+    },
+
+    clearAll() {
+      tasks.forEach((task) => {
+        task?.destroy();
+      });
+      tasks.clear();
     },
   };
 }
