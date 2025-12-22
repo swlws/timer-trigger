@@ -2,17 +2,25 @@
   "name": "time-trigger",
   "version": "1.0.0",
   "description": "Time Trigger",
-  "main": "index.js",
+  "main": "dit/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "vite build"
+    "build": "vite build",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/swlws/time-trigger.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "time-trigger",
+    "timer",
+    "corn"
+  ],
+  "author": "swlws",
   "license": "ISC",
   "type": "module",
   "bugs": {
