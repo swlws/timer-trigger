@@ -14,7 +14,11 @@
       const now = Date.now();
 
       timeTrigger.once(now + 3000, function () {
-        console.log('3 秒后触发');
+        console.log('3 秒后触发 - 001');
+      });
+
+      timeTrigger.once(now + 3000, function () {
+        console.log('3 秒后触发 - 002');
       });
 
       timeTrigger.once(now + 5000, () => {

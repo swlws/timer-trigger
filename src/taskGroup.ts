@@ -3,17 +3,26 @@ import { TickStrategyResolver } from './strategies';
 export class TimeTriggerTaskGroup {
   private timerId: number | null = null;
   private executed = false;
+  private tasks: Array<() => void>;
 
   constructor(
     public targetTime: number,
-    private tasks: Set<() => void>,
     private resolver: TickStrategyResolver
   ) {
+    this.tasks = [];
+
     this.tick();
   }
 
   addTask(callback: () => void) {
-    this.tasks.add(callback);
+    this.tasks.push(callback);
+  }
+
+  removeTask(callback: () => void) {
+    const index = this.tasks.indexOf(callback);
+    if (index !== -1) {
+      this.tasks.splice(index, 1);
+    }
   }
 
   private clearTimer() {
@@ -21,6 +30,10 @@ export class TimeTriggerTaskGroup {
       clearTimeout(this.timerId);
       this.timerId = null;
     }
+  }
+
+  isEmpty() {
+    return this.tasks.length === 0;
   }
 
   private tick() {
@@ -54,6 +67,6 @@ export class TimeTriggerTaskGroup {
 
   destroy() {
     this.clearTimer();
-    this.tasks.clear();
+    this.tasks = [];
   }
 }

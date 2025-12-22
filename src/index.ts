@@ -15,7 +15,7 @@ export function createTimeTrigger() {
 
       let group = taskGroups.get(ts);
       if (!group) {
-        group = new TimeTriggerTaskGroup(ts, new Set(), resolver);
+        group = new TimeTriggerTaskGroup(ts, resolver);
         taskGroups.set(ts, group);
       }
 
@@ -23,6 +23,7 @@ export function createTimeTrigger() {
         try {
           callback();
         } finally {
+          group!.destroy();
           taskGroups.delete(ts);
         }
       };
@@ -31,8 +32,11 @@ export function createTimeTrigger() {
 
       // 返回取消函数
       return () => {
-        group!.destroy();
-        taskGroups.delete(ts);
+        group!.removeTask(wrappedCallback);
+        if (group!.isEmpty()) {
+          group!.destroy();
+          taskGroups.delete(ts);
+        }
       };
     },
 
