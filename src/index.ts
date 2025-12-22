@@ -2,7 +2,17 @@ import { TickStrategyResolver } from './strategies';
 import { TimeTriggerTaskGroup } from './taskGroup';
 import { normalizeTime } from './utils';
 
-export function createTimeTrigger() {
+interface CreateTimerTriggerOption {
+  debug?: boolean;
+}
+
+export function createTimerTrigger(option: CreateTimerTriggerOption = {}) {
+  const { debug = false } = option;
+
+  const log = (msg: string, ...args: any[]) => {
+    if (debug) console.log(`[TimerTrigger] ${msg}`, ...args);
+  };
+
   const resolver = new TickStrategyResolver();
   const taskGroups = new Map<number, TimeTriggerTaskGroup>();
 
@@ -12,6 +22,7 @@ export function createTimeTrigger() {
      */
     once(targetTime: number | string | Date, callback: () => void) {
       const ts = normalizeTime(targetTime);
+      log('Registering task for', ts);
 
       let group = taskGroups.get(ts);
       if (!group) {
@@ -70,6 +81,26 @@ export function createTimeTrigger() {
           taskGroups.delete(t);
         }
       });
+    },
+
+    // 新增：获取任务统计
+    getStats() {
+      return {
+        activeTaskGroups: taskGroups.size,
+        totalTasks: Array.from(taskGroups.values()).reduce(
+          (sum, group) => sum + group.taskSize(),
+          0
+        ),
+      };
+    },
+
+    // 新增：获取所有待执行任务
+    getPendingTasks() {
+      return Array.from(taskGroups.entries()).map(([time, group]) => ({
+        targetTime: time,
+        taskCount: group.taskSize(),
+        remainingMs: time - Date.now(),
+      }));
     },
 
     /**

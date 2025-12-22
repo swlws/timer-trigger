@@ -28,9 +28,9 @@ yarn add time-trigger
 ## 使用示例
 
 ```ts
-import { createTimeTrigger } from 'time-trigger';
+import { createTimerTrigger } from 'time-trigger';
 
-const timeTrigger = createTimeTrigger();
+const timeTrigger = createTimerTrigger();
 
 // 注册 3 秒后任务
 const cancel3s = timeTrigger.once(Date.now() + 3000, () => {
@@ -57,7 +57,7 @@ timeTrigger.clearAll();
 
 ## API
 
-### `createTimeTrigger()`
+### `createTimerTrigger()`
 
 创建一个时间触发器实例。
 

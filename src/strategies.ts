@@ -24,8 +24,12 @@ export class TickStrategyResolver {
   private second = new SecondPrecisionStrategy();
   private half = new HalfRemainingStrategy();
 
+  constructor(private precisionThreshold = 60) {}
+
   resolve(ctx: TickStrategyContext): TickStrategy {
     const remainingSeconds = Math.floor((ctx.targetTime - ctx.now) / 1000);
-    return remainingSeconds <= 60 ? this.second : this.half;
+    return remainingSeconds <= this.precisionThreshold
+      ? this.second
+      : this.half;
   }
 }

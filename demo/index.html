@@ -7,9 +7,9 @@
   </head>
   <body>
     <script src="../dist/timer-trigger.umd.js"></script>
-    <script>
+    <script type="module">
       console.log('测试');
-      var timeTrigger = TimerTrigger.createTimeTrigger();
+      var timeTrigger = TimerTrigger.createTimerTrigger();
 
       const now = Date.now();
 
@@ -30,7 +30,9 @@
       });
       cancel3s();
 
-      timeTrigger.emitNow(now + 5000);
+      // timeTrigger.emitNow(now + 5000);
+      timeTrigger.emitNow();
+
     </script>
   </body>
 </html>

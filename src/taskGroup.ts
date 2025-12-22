@@ -14,6 +14,14 @@ export class TimeTriggerTaskGroup {
     this.tick();
   }
 
+  isEmpty() {
+    return this.taskSize() === 0;
+  }
+
+  taskSize() {
+    return this.tasks.length;
+  }
+
   addTask(callback: () => void) {
     this.tasks.push(callback);
   }
@@ -30,10 +38,6 @@ export class TimeTriggerTaskGroup {
       clearTimeout(this.timerId);
       this.timerId = null;
     }
-  }
-
-  isEmpty() {
-    return this.tasks.length === 0;
   }
 
   private tick() {
