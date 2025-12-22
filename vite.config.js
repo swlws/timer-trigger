@@ -9,7 +9,7 @@ export default defineConfig({
   // 构建配置
   build: {
     target: 'esnext', // 构建目标
-    minify: false, // 是否压缩
+    minify: true, // 是否压缩
     sourcemap: false, // 输出 sourcemap
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'), // 库入口文件
