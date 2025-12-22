@@ -7,21 +7,26 @@
   </head>
   <body>
     <script src="../dist/timer-trigger.umd.js"></script>
-    <!-- <script src="D:\OpenSource\time-trigger\dist\timer-trigger.umd.js"></script> -->
     <script>
       console.log('测试');
       var timeTrigger = TimerTrigger.createTimeTrigger();
 
-      timeTrigger.on(Date.now() + 3000, function () {
-        console.log('3 秒后触发');
-      });
-      timeTrigger.on(Date.now() + 3000, function () {
+      const now = Date.now();
+
+      timeTrigger.once(now + 3000, function () {
         console.log('3 秒后触发');
       });
 
-      timeTrigger.on(Date.now() + 5000, function () {
+      timeTrigger.once(now + 5000, () => {
         console.log('5 秒后触发');
       });
+
+      const cancel3s = timeTrigger.once(now + 3000, () => {
+        console.log('3 秒后触发');
+      });
+      cancel3s();
+
+      timeTrigger.emitNow(now + 5000);
     </script>
   </body>
 </html>
