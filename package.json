@@ -2,7 +2,7 @@
   "name": "timer-trigger",
   "version": "1.0.1",
   "description": "Timer Trigger",
-  "main": "dit/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -18,7 +18,7 @@
   "keywords": [
     "timer-trigger",
     "timer",
-    "corn"
+    "cron"
   ],
   "author": "swlws",
   "license": "ISC",

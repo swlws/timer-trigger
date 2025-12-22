@@ -17,19 +17,6 @@ export default defineConfig({
       fileName: (format) => `timer-trigger.${format}.js`, // 输出文件名
       formats: ['es', 'umd'], // 输出格式
     },
-    rollupOptions: {
-      // 外部依赖，不打包进库
-      external: ['vue', 'lodash'],
-      output: {
-        // 全局变量名映射，用于 UMD 构建
-        globals: {
-          vue: 'Vue',
-          lodash: '_',
-        },
-        // 让 cjs 构建也能生成命名导出
-        exports: 'named',
-      },
-    },
   },
 
   plugins: [
