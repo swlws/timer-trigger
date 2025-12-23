@@ -1,4 +1,4 @@
-# time-trigger
+# timer-trigger
 
 高精度、策略优化的浏览器端一次性定时器工具（TypeScript）。  
 支持按目标时间触发任务、自动修复前端定时器漂移、相同时间任务共享定时器，并提供取消和立即触发功能。
@@ -19,16 +19,16 @@
 
 ```bash
 # 使用 npm
-npm install time-trigger
+npm install timer-trigger
 
 # 使用 yarn
-yarn add time-trigger
+yarn add timer-trigger
 ```
 
 ## 使用示例
 
 ```ts
-import { createTimerTrigger } from 'time-trigger';
+import { createTimerTrigger } from 'timer-trigger';
 
 const timeTrigger = createTimerTrigger();
 
